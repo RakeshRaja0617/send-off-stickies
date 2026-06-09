@@ -79,6 +79,21 @@
         #emoji-picker span { font-size: 24px; cursor: pointer; transition: transform 0.2s; }
         #emoji-picker span:hover { transform: scale(1.4); }
 
+        /* Photo Gallery */
+        #gallery {
+            display: flex; gap: 15px; overflow-x: auto; padding: 20px;
+            margin: 0 auto 40px auto; max-width: 90vw;
+            background: rgba(255,255,255,0.2); border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+        .gallery-img {
+            height: 200px; border-radius: 10px; border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.3s;
+        }
+        .gallery-img:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        #gallery::-webkit-scrollbar { height: 8px; }
+        #gallery::-webkit-scrollbar-thumb { background: rgba(255,64,129,0.5); border-radius: 10px; }
+
         /* The Wall & Notes */
         #wall { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding-bottom: 50px; }
 
@@ -148,6 +163,20 @@
     </div>
     <input type="text" id="wishInput" placeholder="Drop a crazy farewell message..." onkeypress="handleWishEnter(event)">
     <button onclick="addWish()">Drop it!</button>
+</div>
+
+<h2 style="text-align:center; color:#333; text-shadow: 1px 1px 2px white;">📸 Sweet Memories 📸</h2>
+<div id="gallery">
+    <img src="/392dafee-981a-4761-ba80-110a9b1d1525.jpg" class="gallery-img">
+    <img src="/44650277-4d45-409b-9783-a7658785a3d0.jpg" class="gallery-img">
+    <img src="/60c095eb-b301-4fb0-85a2-42e2926ec778.jpg" class="gallery-img">
+    <img src="/8040fe5b-3ec6-4fb8-a2d7-d734e6556aaf.jpg" class="gallery-img">
+    <img src="/a02298ec-7be5-4541-aa2d-5b39a87de857.jpg" class="gallery-img">
+    <img src="/b5f2e473-a143-42c1-bf31-4091f4561cd5.jpg" class="gallery-img">
+    <img src="/cfacdd14-6852-402f-bba2-a706d98b7412.jpg" class="gallery-img">
+    <img src="/e20803fd-0421-432d-8e1d-d0b4d2d4c8f5.jpg" class="gallery-img">
+    <img src="/e344da94-c719-458d-9f46-66573a434582.jpg" class="gallery-img">
+    <img src="/f1a2c80b-d2fc-4986-80a1-40ea6c792873.jpg" class="gallery-img">
 </div>
 
 <div id="wall"></div>
