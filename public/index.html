@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crazy Farewell Wall!</title>
+    <style>
+        /* Animated Gradient Background */
+        body { 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
+            margin: 0; padding: 20px; 
+            min-height: 100vh;
+            background: linear-gradient(120deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Full Screen Name Prompt (Modal) */
+        #name-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white; padding: 40px; border-radius: 20px;
+            text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .hidden { display: none !important; }
+
+        /* Glassmorphism Input Area */
+        #input-area { 
+            text-align: center; 
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+            position: relative;
+            z-index: 100;
+        }
+
+        h2 { margin-top: 0; color: #333; font-size: 28px; text-transform: uppercase; letter-spacing: 2px;}
+        
+        #greeting { font-size: 14px; color: #555; margin-bottom: 10px; font-weight: bold; }
+        .change-name-btn { background: transparent; color: #ff4081; border: none; cursor: pointer; text-decoration: underline; font-size: 12px;}
+
+        input[type="text"] {
+            padding: 12px; font-size: 16px; border: none; border-radius: 10px;
+            width: 60%; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+            outline: none; transition: 0.3s; margin-bottom: 15px;
+        }
+        input[type="text"]:focus { transform: scale(1.05); }
+
+        button {
+            padding: 12px 25px; font-size: 16px; font-weight: bold; border: none;
+            border-radius: 10px; background: #ff4081; color: white; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        button:hover { transform: translateY(-5px) scale(1.1); background: #f50057; }
+
+        /* Emoji Picker */
+        #emoji-picker { margin-bottom: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        #emoji-picker span { font-size: 24px; cursor: pointer; transition: transform 0.2s; }
+        #emoji-picker span:hover { transform: scale(1.4); }
+
+        /* The Wall & Notes */
+        #wall { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding-bottom: 50px; }
+
+        .note { 
+            width: 180px; height: 180px; 
+            padding: 15px; border-radius: 5px;
+            box-shadow: 3px 5px 15px rgba(0,0,0,0.2);
+            word-wrap: break-word; overflow-y: auto; font-size: 16px; font-weight: bold;
+            color: #222; display: flex; flex-direction: column; justify-content: space-between;
+            
+            /* Magic Variables set by JS */
+            background-color: var(--bg-color);
+            transform: rotate(var(--rot)) scale(0);
+            
+            /* Pop-in animation */
+            animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .note:hover {
+            transform: scale(1.2) rotate(0deg) !important;
+            z-index: 50; box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 20px var(--bg-color);
+        }
+
+        .note-controls { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; }
+        .note-controls span { cursor: pointer; font-size: 14px; opacity: 0.6; transition: opacity 0.2s; background: rgba(255,255,255,0.5); padding: 2px 5px; border-radius: 5px;}
+        .note-controls span:hover { opacity: 1; background: rgba(255,255,255,0.9); }
+        .note-text { flex-grow: 1; margin-top: 15px; }
+        .note-author { text-align: right; font-size: 14px; font-style: italic; opacity: 0.8; margin-top: 10px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 5px;}
+
+        @keyframes popIn { to { transform: rotate(var(--rot)) scale(1); } }
+
+        /* Custom Scrollbar */
+        .note::-webkit-scrollbar { width: 5px; }
+        .note::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+
+        /* Confetti */
+        .confetti { position: fixed; width: 12px; height: 12px; top: -20px; z-index: 999; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+    </style>
+</head>
+<body>
+
+<div id="name-modal">
+    <div class="modal-content">
+        <h2>Who is writing? ✍️</h2>
+        <input type="text" id="nameInput" placeholder="Enter your name..." onkeypress="handleNameEnter(event)"><br>
+        <button onclick="saveName()">Let's Go!</button>
+    </div>
+</div>
+
+<div id="input-area">
+    <h2>🎉 Farewell Wall! 🎉</h2>
+    <div id="greeting"></div>
+    <button class="change-name-btn" onclick="openNameModal()">Not you? Change Name</button>
+    <br><br>
+    <div id="emoji-picker">
+        <span onclick="addEmoji('😢')">😢</span>
+        <span onclick="addEmoji('💔')">💔</span>
+        <span onclick="addEmoji('👋')">👋</span>
+        <span onclick="addEmoji('🚀')">🚀</span>
+        <span onclick="addEmoji('🎉')">🎉</span>
+        <span onclick="addEmoji('🥺')">🥺</span>
+        <span onclick="addEmoji('🫶')">🫶</span>
+        <span onclick="addEmoji('🍻')">🍻</span>
+    </div>
+    <input type="text" id="wishInput" placeholder="Drop a crazy farewell message..." onkeypress="handleWishEnter(event)">
+    <button onclick="addWish()">Drop it!</button>
+</div>
+
+<div id="wall"></div>
+
+<script>
+    const wall = document.getElementById('wall');
+    let wishes = [];
+    let currentUser = localStorage.getItem('farewellUserName') || "";
+    const colors = ['#ff9add', '#ffdf73', '#73ff8c', '#73d7ff', '#d673ff', '#ff8c69', '#ffff88'];
+    const API_URL = '/api/wishes'; // Uses relative path so it works seamlessly when hosted
+
+    // --- Name Management ---
+    function checkName() {
+        if (!currentUser) {
+            document.getElementById('name-modal').classList.remove('hidden');
+        } else {
+            document.getElementById('name-modal').classList.add('hidden');
+            document.getElementById('greeting').innerText = `Currently writing as: ${currentUser}`;
+            loadWishes();
+        }
+    }
+
+    function saveName() {
+        const nameInput = document.getElementById('nameInput').value.trim();
+        if (nameInput) {
+            currentUser = nameInput;
+            localStorage.setItem('farewellUserName', currentUser);
+            document.getElementById('nameInput').value = ''; // clear input
+            checkName();
+        }
+    }
+
+    function openNameModal() {
+        document.getElementById('name-modal').classList.remove('hidden');
+        document.getElementById('nameInput').value = currentUser;
+        document.getElementById('nameInput').focus();
+    }
+
+    function handleNameEnter(event) {
+        if (event.key === 'Enter') saveName();
+    }
+
+    // --- Wall & Wish Management ---
+    function createNoteElement(wishObj) {
+        const div = document.createElement('div');
+        div.className = 'note';
+        div.dataset.id = wishObj._id;
+        
+        // Use consistent colors for same ID if possible, or random
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        div.style.setProperty('--bg-color', randomColor);
+        
+        const randomRot = (Math.random() * 40) - 20; 
+        div.style.setProperty('--rot', randomRot + 'deg');
+        
+        let controlsHTML = '';
+        if (wishObj.author === currentUser) {
+            controlsHTML = `
+                <div class="note-controls">
+                    <span onclick="editWish('${wishObj._id}')" title="Edit">✏️</span>
+                    <span onclick="deleteWish('${wishObj._id}')" title="Delete">🗑️</span>
+                </div>
+            `;
+        }
+
+        div.innerHTML = `
+            ${controlsHTML}
+            <div class="note-text" id="text-${wishObj._id}">${wishObj.text}</div>
+            <div class="note-author">- ${wishObj.author}</div>
+        `;
+        wall.appendChild(div);
+    }
+
+    async function loadWishes() {
+        try {
+            const response = await fetch(API_URL);
+            wishes = await response.json();
+            wall.innerHTML = '';
+            wishes.forEach(wish => createNoteElement(wish));
+        } catch (error) {
+            console.error('Error fetching wishes:', error);
+            // Optionally fallback to empty wall if server is down
+        }
+    }
+
+    async function addWish() {
+        const input = document.getElementById('wishInput');
+        const text = input.value.trim();
+        
+        if (text !== "" && currentUser !== "") {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, author: currentUser })
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    wishes.push(result.wish);
+                    createNoteElement(result.wish); 
+                    input.value = '';
+                    shootConfetti(); 
+                } else {
+                    alert('Failed to save wish: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error saving wish:', error);
+                alert('Could not connect to server. Is it running?');
+            }
+        } else if (currentUser === "") {
+            openNameModal();
+        }
+    }
+
+    async function deleteWish(id) {
+        if (!confirm("Are you sure you want to delete this wish?")) return;
+        
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                // Find and remove element from DOM
+                const noteElement = document.querySelector(`.note[data-id="${id}"]`);
+                if (noteElement) noteElement.remove();
+                
+                // Remove from array
+                wishes = wishes.filter(w => w._id !== id);
+            } else {
+                const result = await response.json();
+                alert('Failed to delete: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error deleting wish:', error);
+        }
+    }
+
+    async function editWish(id) {
+        const textDiv = document.getElementById(`text-${id}`);
+        const currentText = textDiv.innerText;
+        
+        const newText = prompt("Edit your wish:", currentText);
+        
+        if (newText !== null && newText.trim() !== "" && newText !== currentText) {
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: newText.trim() })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    textDiv.innerText = result.wish.text;
+                    const index = wishes.findIndex(w => w._id === id);
+                    if (index !== -1) wishes[index].text = result.wish.text;
+                } else {
+                    const result = await response.json();
+                    alert('Failed to update: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error updating wish:', error);
+            }
+        }
+    }
+
+    function handleWishEnter(event) {
+        if (event.key === 'Enter') addWish();
+    }
+
+    function addEmoji(emoji) {
+        const input = document.getElementById('wishInput');
+        input.value += emoji;
+        input.focus();
+    }
+
+    // --- Confetti ---
+    function shootConfetti() {
+        for(let i = 0; i < 70; i++) {
+            let conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 60%)`;
+            if (Math.random() > 0.5) conf.style.borderRadius = '50%';
+            conf.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 4000);
+        }
+    }
+
+    // --- Boot up ---
+    if (!currentUser) {
+        checkName();
+    } else {
+        document.getElementById('name-modal').classList.add('hidden');
+        document.getElementById('greeting').innerText = `Currently writing as: ${currentUser}`;
+        loadWishes();
+    }
+</script>
+
+</body>
+</html>
